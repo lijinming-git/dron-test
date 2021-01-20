@@ -1,0 +1,28 @@
+kind: pipeline
+type: docker
+name: default
+
+clone:
+  depth: 1
+
+steps:
+- name: release
+  image: registry.cn-beijing.aliyuncs.com/wa/node
+  environment:
+    GITHUB_TOKEN:
+      from_secret: GITHUB_TOKEN
+  when:
+    event: push
+    branch: master
+  commands:
+    - echo "branch is $DRONE_BRANCH, commit id is $DRONE_COMMIT"
+    - rm -rf './dist'
+    - npm install
+    - npm run build
+    - cd ./dist
+    - git init
+    - git checkout -b gh-pages
+    - git add .
+    - git commit -m 'drone update file'
+    - git push "https://$GITHUB_TOKEN@github.com/pujianguo/drone_vue.git" gh-pages:gh-pages -f
+    - echo https://pujianguo.github.io/drone_vue
